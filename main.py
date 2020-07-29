@@ -6,7 +6,7 @@ import argparse
 
 
 class LineMemory:
-    __init__(self):
+    def __init__(self):
         self.found_lanes = False
         self.last_coefficients = []
 
@@ -143,13 +143,15 @@ def slidingWindow(img, nwindows=9, min_pixels=50, margin=100, visualize=True):
     return left, right, out_img
 
 
-def fitPolynomial(leftx, lefty, rightx, righty, yvalues):
+def fitPolynomial(size, leftx, lefty, rightx, righty):
     # Verical oriented
     (A1, B1, C1) = np.polyfit(lefty, leftx, 2)
     (A2, B2, C2) = np.polyfit(righty, rightx, 2)
 
-    left_fitx = A1 * yvalues ** 2 + B1 * yvalues + C1
-    right_fitx = A2 * yvalues ** 2 + B2 * yvalues + C2
+    ploty = np.linspace(0, size-1, size)
+
+    left_fitx = A1 * ploty ** 2 + B1 * ploty + C1
+    right_fitx = A2 * ploty ** 2 + B2 * ploty + C2
 
     return left_fitx, right_fitx
 
@@ -184,11 +186,9 @@ def main():
     out_img[lefty, leftx] = [255, 0, 0]
     out_img[righty, rightx] = [0, 0, 255]
 
-    ploty = np.linspace(0, image.shape[0]-1, image.shape[0])
-
     # Fit a 2nd degree polynomial
-    left_line, right_line = fitPolynomial(leftx, lefty,
-                                          rightx, righty, yvalues=ploty)
+    left_line, right_line = fitPolynomial(img.shape[0], leftx,
+                                          lefty, rightx, righty)
 
     plt.imshow(out_img)
     plt.plot(left_line, ploty, color="yellow")
