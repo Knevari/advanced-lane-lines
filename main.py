@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 import argparse
 
 
+class LineMemory:
+    __init__(self):
+        self.found_lanes = False
+        self.last_coefficients = []
+
+
 def toHLS(img):
     """Convert image to HLS channel
     and return separated channels"""
@@ -54,10 +60,10 @@ def warpImage(img):
     width = img.shape[1]
 
     src = np.array([
-        [165, 705],  # Bottom Left
-        [595, 460],  # Top Left
-        [735, 460],  # Top Right
-        [1105, 705]  # Bottom Right
+        [160, 720],  # Bottom Left
+        [570, 460],  # Top Left
+        [690, 460],  # Top Right
+        [1090, 720]  # Bottom Right
     ], dtype=np.float32)
 
     dst = np.array([
@@ -72,35 +78,14 @@ def warpImage(img):
     return warped
 
 
-def main():
-    parser = argparse.ArgumentParser("Do stuff")
-    parser.add_argument("filename")
+def slidingWindow(img, nwindows=9, min_pixels=50, margin=100, visualize=True):
+    window_height = img.shape[0] // nwindows
 
-    args = parser.parse_args()
-    filename = args.filename
-
-    # Read a RGB image
-    image = mpimg.imread(filename)
-    image = cv2.resize(image, (1280, 720))
-    _, L, S = toHLS(image)
-
-    lbinary = to8BitSobel(absoluteSobel(L))
-    sbinary = to8BitSobel(absoluteSobel(S))
-    lbinary = valueThreshold(lbinary, (20, 100))
-    sbinary = valueThreshold(sbinary, (20, 100))
-    cbinary = cv2.bitwise_or(lbinary, sbinary)
-
-    warped = warpImage(cbinary)
-    histogram = createHistogram(warped[warped.shape[0]//2:, :])
+    histogram = createHistogram(img[img.shape[0]//2:, :])
 
     midpoint = histogram.shape[0] // 2
     leftx_base = np.argmax(histogram[:midpoint])
     rightx_base = np.argmax(histogram[midpoint:]) + midpoint
-
-    box_margin = 100
-    min_pixels = 50
-    nwindows = 9
-    window_height = cbinary.shape[0] // nwindows
 
     leftx_curr = leftx_base
     rightx_curr = rightx_base
@@ -108,32 +93,37 @@ def main():
     left_lane_idxs = []
     right_lane_idxs = []
 
-    nonzero = warped.nonzero()
+    nonzero = img.nonzero()
     nonzeroy = nonzero[0]
     nonzerox = nonzero[1]
 
+    out_img = np.dstack((img, img, img)) * 255
+
     for w in range(nwindows):
-        topy = warped.shape[0] - (w * window_height)
-        bottomy = warped.shape[0] - ((w + 1) * window_height)
+        topy = img.shape[0] - (w * window_height)
+        bottomy = img.shape[0] - ((w + 1) * window_height)
 
-        leftx_min = leftx_curr - box_margin
-        leftx_max = leftx_curr + box_margin
+        leftx_min = leftx_curr - margin
+        leftx_max = leftx_curr + margin
 
-        rightx_min = rightx_curr - box_margin
-        rightx_max = rightx_curr + box_margin
+        rightx_min = rightx_curr - margin
+        rightx_max = rightx_curr + margin
 
-        cv2.rectangle(warped, (leftx_min, topy), (leftx_max, bottomy), (0, 255, 0), 4)
-        cv2.rectangle(warped, (rightx_min, topy), (rightx_max, bottomy), (0, 255, 0), 4)
+        if visualize == True:
+            cv2.rectangle(out_img, (leftx_min, topy),
+                          (leftx_max, bottomy), (0, 255, 0), 4)
+            cv2.rectangle(out_img, (rightx_min, topy),
+                          (rightx_max, bottomy), (0, 255, 0), 4)
 
-        left_idxs = (nonzeroy >= bottomy) & \
-                    (nonzeroy < topy) & \
-                    (nonzerox >= leftx_min) & \
-                    (nonzerox > leftx_max)
+        left_idxs = ((nonzeroy >= bottomy) &
+                     (nonzeroy < topy) &
+                     (nonzerox >= leftx_min) &
+                     (nonzerox < leftx_max)).nonzero()[0]
 
-        right_idxs = (nonzeroy >= bottomy) & \
-                     (nonzeroy < topy) & \
-                     (nonzerox >= rightx_min) & \
-                     (nonzerox > rightx_max)
+        right_idxs = ((nonzeroy >= bottomy) &
+                      (nonzeroy < topy) &
+                      (nonzerox >= rightx_min) &
+                      (nonzerox < rightx_max)).nonzero()[0]
 
         left_lane_idxs.append(left_idxs)
         right_lane_idxs.append(right_idxs)
@@ -144,7 +134,65 @@ def main():
         if len(right_idxs) >= min_pixels:
             rightx_curr = np.int(np.mean(nonzerox[right_idxs]))
 
-    plt.imshow(warped)
+    left_lane_idxs = np.concatenate(left_lane_idxs)
+    right_lane_idxs = np.concatenate(right_lane_idxs)
+
+    left = (nonzerox[left_lane_idxs], nonzeroy[left_lane_idxs])
+    right = (nonzerox[right_lane_idxs], nonzeroy[right_lane_idxs])
+
+    return left, right, out_img
+
+
+def fitPolynomial(leftx, lefty, rightx, righty, yvalues):
+    # Verical oriented
+    (A1, B1, C1) = np.polyfit(lefty, leftx, 2)
+    (A2, B2, C2) = np.polyfit(righty, rightx, 2)
+
+    left_fitx = A1 * yvalues ** 2 + B1 * yvalues + C1
+    right_fitx = A2 * yvalues ** 2 + B2 * yvalues + C2
+
+    return left_fitx, right_fitx
+
+
+def main():
+    parser = argparse.ArgumentParser("Do stuff")
+    parser.add_argument("filename")
+
+    args = parser.parse_args()
+    filename = args.filename
+
+    # Read a RGB image
+    image = mpimg.imread(filename)
+    image = cv2.resize(image, (1280, 720))
+    # Convert image to HLS
+    _, L, S = toHLS(image)
+
+    # Apply Sobel operator on both L and S channels
+    # And return the combined version of both binary images
+    lbinary = to8BitSobel(absoluteSobel(L))
+    sbinary = to8BitSobel(absoluteSobel(S))
+    lbinary = valueThreshold(lbinary, (20, 100))
+    sbinary = valueThreshold(sbinary, (20, 100))
+    cbinary = cv2.bitwise_or(lbinary, sbinary)
+
+    # Warp perspecive to see road from above
+    warped = warpImage(cbinary)
+
+    # Find lane lines points using sliding windows technique
+    (leftx, lefty), (rightx, righty), out_img = slidingWindow(warped)
+
+    out_img[lefty, leftx] = [255, 0, 0]
+    out_img[righty, rightx] = [0, 0, 255]
+
+    ploty = np.linspace(0, image.shape[0]-1, image.shape[0])
+
+    # Fit a 2nd degree polynomial
+    left_line, right_line = fitPolynomial(leftx, lefty,
+                                          rightx, righty, yvalues=ploty)
+
+    plt.imshow(out_img)
+    plt.plot(left_line, ploty, color="yellow")
+    plt.plot(right_line, ploty, color="yellow")
     plt.show()
 
 
