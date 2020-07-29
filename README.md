@@ -7,10 +7,10 @@ Identifying the lane lines.
 The first step is to retrieve relevant data from
 the image using some kind of feature extraction.
 
-I've tried visualizing the images in several color schemas
+I've tried visualizing the images in several color models
 And the ones where the lane lines are most visible are
 in RGB - R and G channels and HSL - S and L channels
-Although, I'm not sure wether I can rely safely on the L channel
+Although, I'm not sure whether I can rely safely on the L channel
 for feature extraction, because the lightness changes very much
 in adverse scenarios and I don't have a lot of images to test on.
 
