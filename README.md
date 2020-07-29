@@ -19,7 +19,8 @@ be sure of wether or not I should make use of the L channel for feature
 extraction.
 
 S channel has been the most reliable this far, it seems to make
-most of the lane lines on the image visible, but not all of them.
+most of the lane lines on the image visible, but fails to demonstrate
+in more complex examples, for example bright images.
 
 I need to find some other way of getting more information
 
