@@ -19,10 +19,17 @@ be sure of wether or not I should make use of the L channel for feature
 extraction.
 
 S channel has been the most reliable this far, it seems to make
-most of the lane lines in the image visible, but not all of them
+most of the lane lines in the image visible, but not all of them.
+
 I need to find some other way of getting more information
+
 Applying Sobel operator on the S channel has brought me some good
 results.
 
 Maybe trying to filter out non-yellow and non-white sections of the
 image can bring me good results as well.
+
+Apprrently, applying the Sobel operator on both S and L channels 
+and getting a value threshold works very well on abstracting most
+of the unnecessary details of the image. It worked fine with all my test
+images, so I think I'll work through the next steps.
