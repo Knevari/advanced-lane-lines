@@ -15,7 +15,7 @@ for feature extraction, because the lightness changes very much
 in adverse scenarios and I don't have a lot of images to test on.
 
 It would be preferable if I had some night images as well, just to
-be sure of wether or not I should make use of the L channel for feature
+be sure of whether or not I should make use of the L channel for feature
 extraction.
 
 S channel has been the most reliable this far, it seems to make
