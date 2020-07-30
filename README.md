@@ -1,36 +1,13 @@
-### Some notes for myself
+# Advanced Lanes Detection
 
-At first we are going to test our pipeline
-in an image to make sure we are correctly
-Identifying the lane lines.
+The challenge in this project is to precisely detect lane lines in a video stream and extract subtle information about the car's current state, there are several steps we need to walk through in order to achieve the desired results, and we're gonna explore some of them in this article.
 
-The first step is to retrieve relevant data from
-the image using some kind of feature extraction.
+### Detecting lane lines
 
-I've tried visualizing the images in several color models
-And the ones where the lane lines are most visible are
-in RGB - R and G channels and HSL - S and L channels
-Although, I'm not sure whether I can rely safely on the L channel
-for feature extraction, because the lightness changes very much
-in adverse scenarios and I don't have a lot of images to test on.
+It's a trivial task for humans to recognize lane lines whilst driving. But for an autonomous car it is not an easy task, there are a lot of details we need to pay attention while implementing an algorithm to detect lane lines and several things we need to ask ourselves while programming it, for instance, what would be the best way of abstracting away all the unnecessary details of an image and keep just what we're looking for? Is there some deceptive noise or too much information? It's hard to keep track of these things when our data has a high variance and the context of what we need to track is broader, for example, what if the algorithm works well on bright images, but performs poorly during the night? This is a scenario we can't face while working with self-driving cars, because lives can be at stake.
 
-It would be preferable if I had some night images as well, just to
-be sure of wether or not I should make use of the L channel for feature
-extraction.
+In the first project, we utilized [Canny Edges Detection](https://en.wikipedia.org/wiki/Canny_edge_detector#:~:text=The%20Canny%20edge%20detector%20is,explaining%20why%20the%20technique%20works.) and [Probabilistic Hough Transform](https://en.wikipedia.org/wiki/Hough_transform#:~:text=The%20Hough%20transform%20is%20a,shapes%20by%20a%20voting%20procedure.) to detect lines in parameter space and draw them on road images, it works well in some situations, but it is not a reliable algorithm because it can't detect steep curves very well, in this project we are going to make use of [Sobel Operator](https://en.wikipedia.org/wiki/Sobel_operator) to extract only relevant edges and build our way up to a better feature extraction pipeline.
 
-S channel has been the most reliable this far, it seems to make
-most of the lane lines on the image visible, but fails to demonstrate
-in more complex examples, for example bright images.
+##### Sobel Operator
 
-I need to find some other way of getting more information
-
-Applying Sobel operator on the S channel has brought me some good
-results.
-
-Maybe trying to filter out non-yellow and non-white sections of the
-image can bring me good results as well.
-
-Apprrently, applying the Sobel operator on both S and L channels 
-and getting a value threshold works very well on abstracting most
-of the unnecessary details of the image. It worked fine with all my test
-images, so I think I'll work through the next steps.
+TO BE CONTINUED
