@@ -12,14 +12,7 @@ In the first project, we utilized [Canny Edges Detection](https://en.wikipedia.o
 
 Sobel is an algorithm to emphasize edges over a direction getting an approximation to the derivative on an image, it runs a odd sized kernel over the image pixels and return the summation of the element-wise product between the kernel and the pixels surrounding the pixel.
 
-<p align="center" style="display: grid; grid-template-columns: 1fr 1fr 1fr">
-    <img src="/github_examples/straight_lines1.jpg" alt="Original Image"
-    	title="Original Image" />
-    <img src="/github_examples/sobel_x.jpg" alt="Sobel X"
-    	title="Sobel applied in X direction" />
-    <img src="/github_examples/sobel_x.jpg" alt="Sobel Y"
-    	title="Sobel applied in Y direction" />
-</p>
+![Original Image](/github_examples/straight_lines1.jpg "Original Image") ![Sobel X](/github_examples/sobel_x.jpg "Sobel applied in X direction") ![Sobel Y]("/github_examples/sobel_x.jpg" "Sobel applied in Y direction")
 
 Here is an [excellent video](https://www.youtube.com/watch?v=sRFM5IEqR2w) explaining how it works
 
