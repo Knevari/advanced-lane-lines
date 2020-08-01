@@ -19,9 +19,9 @@ Sobel is an algorithm to emphasize edges over a direction getting an approximati
     <td>Sobel applied in Y direction</td>
   </tr>
   <tr>
-    <td><img title="Original Image" alt="Original Image" src="/github_examples/straight_lines1.jpg" width=270 height=250></td>
-    <td><img title="Sobel applied in X direction" alt="Sobel X" src="/github_examples/sobel_x.jpg" width=270 height=250></td>
-    <td><img title="Sobel applied in Y direction" alt="Sobel Y" src="/github_examples/sobel_x.jpg" width=270 height=250></td>
+    <td valign="top"><img title="Original Image" alt="Original Image" src="/github_examples/straight_lines1.jpg" width=270 height=250></td>
+    <td valign="top"><img title="Sobel applied in X direction" alt="Sobel X" src="/github_examples/sobel_x.jpg" width=270 height=250></td>
+    <td valign="top"><img title="Sobel applied in Y direction" alt="Sobel Y" src="/github_examples/sobel_x.jpg" width=270 height=250></td>
   </tr>
  </table>
 
