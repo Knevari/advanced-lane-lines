@@ -123,3 +123,31 @@ We define the mean of both peaks as our starting points to search for all lane l
 With the help of an auxiliary class called LaneMemory, I keep track of my previous detections, everytime we send a new frame through the pipeline, the LaneFinder checks if there is a best fit for both lane lines, in case there is, then we search around the previous detected points instead of applying sliding windows again, and therefore having a huge gain in performance.
 
 ![Search from Prior](/github_examples/search_from_prior.png "Search from Prior")
+
+### Measuring Curvature
+
+The radius of curvature of the curve at a given point is given by:
+
+![Curvature](https://latex.codecogs.com/svg.latex?\frac{\left%20[1%20+%20\left%20(\frac{dx}{dy}%20%20\right%20)%20^{2}%20%20\right%20]%20^{3/2}}{\left%20|%20\frac{d%20^%202%20x}{dy^2}%20\right%20|} "Curvature")
+
+The only problem with applying that in code, is that we are measuring it in pixel space, and the results are not gonna be correct for our purposes, so we need to transform it in something useful. The way we are doing it in this project, is by calculating the coefficients of our second degree function that represents the lane line accordingly to the values per pixel in each direction.
+
+Here is a quick snippet of the code responsible for measuring the curvature:
+
+```python
+def getCurvature(self):
+        y_eval = np.max(self.y_values)
+        left_x = self.memory.left.xpoly
+        right_x = self.memory.right.xpoly
+
+        left_fit = np.polyfit(self.y_values * my, left_x * mx, 2)
+        right_fit = np.polyfit(self.y_values * my, right_x * mx, 2)
+
+        left_curv = ((1 + (2 * left_fit[0] * y_eval * my + left_fit[1])
+                      ** 2) ** 1.5) / np.absolute(2 * left_fit[0])
+
+        right_curv = ((1 + (2 * right_fit[0] * y_eval * my + right_fit[1])
+                       ** 2) ** 1.5) / np.absolute(2 * right_fit[0])
+
+        return (0.5 / (left_curv / 1000 + right_curv / 1000))
+```
