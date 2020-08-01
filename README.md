@@ -35,6 +35,8 @@ Well, as I mentioned before, our ultimate goal in this project is to detect lane
 
 To calibrate the camera, we first need to take pictures of known shapes to be able to detect and correct 
 
+You can see [OpenCV's official documentation](https://docs.opencv.org/2.4/doc/tutorials/calib3d/camera_calibration/camera_calibration.html) for more information about camera calibration
+
 ##### Types of Distortion
 
 * [Radial Distortion](https://en.wikipedia.org/wiki/Distortion_(optics)#:~:text=Radial%20distortion%20is%20a%20failure,to%20image%20lines%20into%20lines.)
