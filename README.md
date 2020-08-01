@@ -29,4 +29,68 @@ Here is an [excellent video](https://www.youtube.com/watch?v=sRFM5IEqR2w) explai
 
 ### Pipeline
 
-One of the most important steps in our algorithm is the pipeline, the part of the program responsible for removing unnecessary details and extracting useful information for us to work with. there are several ways of building a good pipeline and in this project I tried a **lot** of different ways to achieve the best result. It is important to notice that our desired state is the one where we abstract away noise and unnecessary information from the image, it is not essential lefting out only the lane lines, because the algorithm can deal relatively well with noisy data and we are working only with a small section of the image where lane lines are expected to be, but we should do our best to tune the parameters and find the best combination of steps to build a reliable pipeline
+One of the most important steps in our algorithm is the pipeline, the part of the program responsible for removing unnecessary details and extracting useful information for us to work with. there are several ways of building a good pipeline, in this project I tried a lot of different ways to achieve the best result. It is important to notice that our desired state is the one where we abstract away noise and unnecessary information from the image, it is not essential lefting out only the lane lines, because the algorithm can deal relatively well with noisy data and we are working only with a small section of the image where lane lines are expected to be, but we should do our best to tune the parameters and find the best combination of steps to build a reliable pipeline.
+
+We are only interested in edges of a particular orientation, because lane lines are mostly close to vertical, so we can filter out edges by their direction, that is simply the inverse tangent of the y gradient divided by the x gradient:
+
+![Grad Dir](https://latex.codecogs.com/svg.latex?arctan(Sy%20/%20Sx))
+
+And can be implemented with numpy's arctan2 function. Another useful way of retrieving useful data is finding the magnitude of the gradient, which is given by:
+
+![Mag Dir](https://latex.codecogs.com/svg.latex?\sqrt(Sx%20^2%20+%20Sy%20^2)) 
+
+And can help us filter some noise by removing the weaker edges from our output. In the next example, we are going to implement those methods and see the combined result of both.
+
+```python
+import cv2
+import numpy as np
+
+def sobel(image, orient="x", ksize=3):
+    if orient == "x":
+        sobel = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=ksize)
+    else:
+        sobel = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=ksize)
+    return np.absolute(sobel)
+
+def gradient_direction(gray):
+    # Calculate Sobel for X and Y axis
+    sobel_x = sobel(gray, orient="x")
+    sobel_y = sobel(gray, orient="y")
+    
+    # Calculate the gradient direction
+    grad_dir = np.arctan2(sobel_y, sobel_x)
+    
+    # Filter edges by direction
+    dir_binary = np.zeros_like(gray)
+    dir_binary[(grad_dir >= np.pi/6) & (grad_dir < np.pi/2)] = 1
+    return dir_binary
+
+def gradient_magnitude(gray):
+    # Calculate Sobel for X and Y axis
+    sobel_x = sobel(gray, orient="x")
+    sobel_y = sobel(gray, orient="y")
+    
+    # Calculate the gradient magnitude
+    grad_mag = np.sqrt(sobel_x ** 2 + sobel_y ** 2)
+    
+    # Filter edges by strength
+    mag_binary = np.zeros_like(gray)
+    mag_binary[(grad_mag >= 20) & (grad_mag < 100)] = 1
+    return mag_binary
+
+image = cv2.imread("some_image.jpg")
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+direction = gradient_direction(gray)
+magnitude = gradient_magnitude(gray)
+
+combined = np.zeros_like(gray)
+combined[(direction == 1) & (magnitude == 1)] = 1
+combined *= 255
+
+cv2.imshow("Combined Thresholds", combined)
+```
+
+![Combined Mag Dir](/github_examples/combined_mag_dir.jpg "Combined Magnitude and Direction")
+
+As you can see, there is a lot of noise, but as I said before, it is not essential to boil out all the unnecessary details to have a reliable prediction, the problem with this approach is that it was taking too much time to calculate the direction of the gradient and just calling np.arctan2 was making the algorithm take a lot more time to process, so I had to try another approach that didn't make use of the direction of the edges. I tried applying color and lighting thresholding, but as expected, it didn't work very well with varying inputs, my final approach was making use of HLS - L and S channels, applying a gaussian blur of kernel size equals 3 in the beginning of the pipeline and getting the threshold of both L and S channels which gave me a pretty decent output and was a lot faster to process.
