@@ -27,6 +27,19 @@ Sobel is an algorithm to emphasize edges over a direction getting an approximati
 
 Here is an [excellent video](https://www.youtube.com/watch?v=sRFM5IEqR2w) explaining how it works
 
+### Camera Calibration
+
+Well, as I mentioned before, our ultimate goal in this project is to detect lane lines and extract information about the car's current state on the road, for that, we first need to change the perspective of our camera to see the road from above so we can have a better perception of the road. The problem is, we can't rely 100% on our camera images, because cameras don't create perfect images, and usually apply some kind of distortion, which can interfere in our image analysis changing the shapes or apparent size of 3D objects.
+
+![Chessboards](/github_examples/chessboards.png)
+
+To calibrate the camera, we first need to take pictures of known shapes to be able to detect and correct 
+
+##### Types of Distortion
+
+* [Radial Distortion](https://en.wikipedia.org/wiki/Distortion_(optics)#:~:text=Radial%20distortion%20is%20a%20failure,to%20image%20lines%20into%20lines.)
+* [Tangential Distortion](https://de.mathworks.com/help/vision/ug/camera-calibration.html#:~:text=Tangential%20distortion%20occurs%20when%20the,xdistorted%2C%20ydistorted)
+
 ### Pipeline
 
 One of the most important steps in our algorithm is the pipeline, the part of the program responsible for removing unnecessary details and extracting useful information for us to work with. there are several ways of building a good pipeline, in this project I tried a lot of different ways to achieve the best result. It is important to notice that our desired state is the one where we abstract away noise and unnecessary information from the image, it is not essential lefting out only the lane lines, because the algorithm can deal relatively well with noisy data and we are working only with a small section of the image where lane lines are expected to be, but we should do our best to tune the parameters and find the best combination of steps to build a reliable pipeline.
