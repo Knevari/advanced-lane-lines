@@ -151,3 +151,30 @@ def getCurvature(self):
 
         return (0.5 / (left_curv / 1000 + right_curv / 1000))
 ```
+
+##### Car Offset From Center
+
+The center of the image can be taken into account as the center of the car, since the camera is mounted on top of it, the difference between the center of the image and the center of the lane lines is the offset from the center of the road:
+
+```python
+def getCarOffset(self):
+        y_eval = np.max(self.y_values)
+
+        left_fit = self.memory.left.best_fit
+        right_fit = self.memory.right.best_fit
+
+        left_fit = np.flip(left_fit, 0)
+        right_fit = np.flip(right_fit, 0)
+        leftl = poly.polyval(y_eval, left_fit)
+        rightl = poly.polyval(y_eval, right_fit)
+
+        center_road = leftl+((rightl-leftl)/2)
+        center_car = 660
+        caroff = (center_car-center_road) * mx
+
+        return caroff
+```
+
+
+
+Obs: There is still a lot of material to add to this README, I'm gonna work on it through the next few days, Thank you very much for reading until here
