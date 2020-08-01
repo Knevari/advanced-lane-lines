@@ -2,8 +2,7 @@ import cv2
 import argparse
 
 from os import path
-from Pipeline import *
-from LaneMemory import LaneMemory
+from pipeline import *
 
 
 def main():
@@ -24,13 +23,13 @@ def main():
     out = cv2.VideoWriter("output/" + filename + ".mp4", fourcc,
                           fps, (frame_width, frame_height), True)
 
-    pipeline = Pipeline(height=frame_height)
+    pipe = Pipeline(height=frame_height)
 
     while cap.isOpened():
         ret, frame = cap.read()
 
         if ret == True:
-            output = pipeline(frame)
+            output = pipe(frame)
             cv2.imshow("Output", output)
         else:
             cap.release()

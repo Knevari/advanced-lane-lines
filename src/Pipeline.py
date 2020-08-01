@@ -1,41 +1,63 @@
+import cv2
 import numpy as np
-from lines import searchPriorLines
-from utils import calibrateCamera, processImage, undistortImage, warp, drawLane
-from LaneMemory import LaneMemory
+import camera
+import perspective
+import utils
+import visualization as vis
+
+from lanefinder import LaneFinder
+
+
+def processImage(img):
+    # Convert img to HLS
+    _, L, S = utils.toHLS(img)
+    # Apply Sobel operator on both L and S channels
+    # And return the combined version of both binary images
+    L = cv2.GaussianBlur(L, (3, 3), 0)
+    S = cv2.GaussianBlur(S, (3, 3), 0)
+
+    l_sobelx = utils.absoluteSobel(L, "x", 3)
+    s_sobelx = utils.absoluteSobel(S, "x", 3)
+
+    lbinary = utils.to8BitSobel(l_sobelx)
+    sbinary = utils.to8BitSobel(s_sobelx)
+    lbinary = utils.valueThreshold(lbinary, (20, 100))
+    sbinary = utils.valueThreshold(sbinary, (20, 100))
+
+    cbinary = cv2.bitwise_or(lbinary, sbinary)
+
+    return cbinary
 
 
 class Pipeline:
     def __init__(self, height):
-        self.mtx, self.dist = calibrateCamera("camera_cal/calibration*.jpg")
-        self.transform_coordinates = {
-            "src": np.float32([
-                [280, 700],
-                [595, 460],
-                [725, 460],
-                [1125, 700]
-            ]),
-            "dst": np.float32([
-                [250, 720],
-                [250, 0],
-                [1065, 0],
-                [1065, 720]
-            ])
-        }
+        self.mtx, self.dist = camera.calibrate("camera_cal/calibration*.jpg")
         self.ploty = np.linspace(0, height-1, height)
-        self.memory = LaneMemory()
+        self.lanefinder = LaneFinder(self.ploty, debug=True)
 
     def __call__(self, img):
-        undistorted = undistortImage(img, self.mtx, self.dist)
+        undistorted = camera.undistort(img, self.mtx, self.dist)
         thresh_img = processImage(undistorted)
 
-        src = self.transform_coordinates["src"]
-        dst = self.transform_coordinates["dst"]
-        warped, Minv = warp(thresh_img, src, dst)
+        warped, Minv = perspective.warp(thresh_img)
 
-        left_fit, right_fit, leftx_poly, rightx_poly, ploty = searchPriorLines(
-            warped, self.memory.left, self.memory.right, self.ploty)
+        leftx_poly, rightx_poly = self.lanefinder.findLanes(warped)
 
-        lane_img = drawLane(undistorted, warped, leftx_poly,
-                            rightx_poly, ploty, Minv)
+        polygon = vis.drawLaneWithPolygon(
+            warped, leftx_poly, rightx_poly, self.ploty)
+        polygon = perspective.unwarp(polygon, Minv)
 
-        return lane_img
+        combined = cv2.addWeighted(undistorted, 1.0, polygon, 0.3, 0)
+
+        curvature = self.lanefinder.getCurvature()
+        car_offset = self.lanefinder.getCarOffset()
+
+        cv2.putText(combined, "Curvature Radius:" + "{:5.2f}km".format(curvature),
+                    (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0,
+                    [255, 255, 255], 2, cv2.LINE_AA)
+
+        cv2.putText(combined, "Distance from Center:" + '{:5.2f}cm'.format(car_offset * 100),
+                    (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.0,
+                    [255, 255, 255], 2, cv2.LINE_AA)
+
+        return combined
