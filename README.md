@@ -120,4 +120,6 @@ We define the mean of both peaks as our starting points to search for all lane l
 
 ![Sliding Windows](/github_examples/sliding_windows.png "Sliding Windows")
 
-with the help of an auxiliary class called LaneMemory, I keep track of my previous detections, everytime we send a new frame through the pipeline, the LaneFinder checks if there is a best fit for both lane lines, in case there is, then we search around the previous detected points instead of applying sliding windows again, and therefore having a huge gain in performance.
+With the help of an auxiliary class called LaneMemory, I keep track of my previous detections, everytime we send a new frame through the pipeline, the LaneFinder checks if there is a best fit for both lane lines, in case there is, then we search around the previous detected points instead of applying sliding windows again, and therefore having a huge gain in performance.
+
+![Search from Prior](/github_examples/search_from_prior.png "Search from Prior")
