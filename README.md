@@ -33,8 +33,6 @@ Well, as I mentioned before, our ultimate goal in this project is to detect lane
 
 ![Chessboards](/github_examples/chessboards.png)
 
-To calibrate the camera, we first need to take pictures of known shapes to be able to detect and correct 
-
 You can see [OpenCV's official documentation](https://docs.opencv.org/2.4/doc/tutorials/calib3d/camera_calibration/camera_calibration.html) for more information about camera calibration
 
 ##### Types of Distortion
@@ -109,3 +107,17 @@ cv2.imshow("Combined Thresholds", combined)
 ![Combined Mag Dir](/github_examples/combined_mag_dir.jpg "Combined Magnitude and Direction")
 
 As you can see, there is a lot of noise, but as I said before, it is not essential to boil out all the unnecessary details to have a reliable prediction, the problem with this approach is that it was taking too much time to calculate the direction of the gradient and just calling np.arctan2 was making the algorithm take a lot more time to process, so I had to try another approach that didn't make use of the direction of the edges. I tried applying color and lighting thresholding, but as expected, it didn't work very well with varying inputs, my final approach was making use of HLS - L and S channels, applying a gaussian blur of kernel size equals 3 in the beginning of the pipeline and getting the threshold of both L and S channels which gave me a pretty decent output and was a lot faster to process.
+
+### Detecting Lane Lines
+
+After the camera calibration, undistortion and pipeline steps, all that is left is to detect the lane lines on the image and calculate the curvature radius and car offset from the center of the road, those steps seem to be hard, but are trivial after you understood the concept, most of my lane finding code can be found [here](/src/lanefinder.py). To detect the lane lines we first create a histogram of the bottom half of the warped image, since there are two lane lines, we expect to see two peaks. 
+
+<p align="center">
+  <img alt="Histogram" title="Histogram" src="/github_examples/histogram.png">
+</p>
+
+We define the mean of both peaks as our starting points to search for all lane line points in the image. This technique is called sliding windows, and can be better represented by the following image:
+
+![Sliding Windows](/github_examples/sliding_windows.png "Sliding Windows")
+
+with the help of an auxiliary class called LaneMemory, I keep track of my previous detections, everytime we send a new frame through the pipeline, the LaneFinder checks if there is a best fit for both lane lines, in case there is, then we search around the previous detected points instead of applying sliding windows again, and therefore having a huge gain in performance.
