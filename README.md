@@ -175,6 +175,9 @@ def getCarOffset(self):
         return caroff
 ```
 
+### Shortcomings
+* A better pipeline would be preferable
+* There is still a lot of performance improvements I could make
+* Lighting can still be a problem
 
-
-Obs: There is still a lot of material to add to this README, I'm gonna work on it through the next few days, Thank you very much for reading until here
+Obs: There is still a lot of material to add to this README, I'm gonna work on it through the next few days, Thank you very much for reading until here!
