@@ -178,7 +178,7 @@ def getCarOffset(self):
 ### Final Result
 
 ![Final Result](/github_examples/final_result.png "Final Result")
-[Video Output](/github_examples/project_video.mp4)
+[Video Output](https://github.com/Knevari/advanced-lane-lines/blob/master/videos_output/project_video.mp4 "Project Video")
 
 ### Shortcomings
 * A better pipeline would be preferable
