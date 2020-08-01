@@ -14,11 +14,11 @@ Sobel is an algorithm to emphasize edges over a direction getting an approximati
 
 <p align="center" style="display: flex; justify-content: center; align-items: center">
     <img src="/github_examples/straight_lines1.jpg" alt="Original Image"
-    	title="Original Image" width="150" height="150" />
+    	title="Original Image" />
     <img src="/github_examples/sobel_x.jpg" alt="Sobel X"
-    	title="Sobel applied in X direction" width="150" height="100" />
+    	title="Sobel applied in X direction" />
     <img src="/github_examples/sobel_x.jpg" alt="Sobel Y"
-    	title="Sobel applied in Y direction" width="150" height="100" />
+    	title="Sobel applied in Y direction" />
 </p>
 
 Here is an [excellent video](https://www.youtube.com/watch?v=sRFM5IEqR2w) explaining how it works
