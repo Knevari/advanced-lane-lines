@@ -112,7 +112,9 @@ As you can see, there is a lot of noise, but as I said before, it is not essenti
 
 After the camera calibration, undistortion and pipeline steps, all that is left is to detect the lane lines on the image and calculate the curvature radius and car offset from the center of the road, those steps seem to be hard, but are trivial after you understood the concept, most of my lane finding code can be found [here](/src/lanefinder.py). To detect the lane lines we first create a histogram of the bottom half of the warped image, since there are two lane lines, we expect to see two peaks. 
 
-![Histogram](/github_examples/histogram.png "Histogram")
+<p align="center">
+  <img alt="Histogram" title="Histogram" src="/github_examples/histogram.png">
+</p>
 
 We define the mean of both peaks as our starting points to search for all lane line points in the image. This technique is called sliding windows, and can be better represented by the following image:
 
