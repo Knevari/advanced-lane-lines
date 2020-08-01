@@ -1,0 +1,20 @@
+Sharp change in intensity or a sharp change in color
+High value indicates a sharp change, a low value indicates a shallow change
+Very common
+It's an approximation to the derivative of an image
+It's separate in the x and y directions
+
+
+X KERNEL
+Gx = [
+    -1, 0, 1,
+    -2, 0, 2,
+    -1, 0, 1
+]
+
+Y KERNEL
+Gy = [
+    -1, -2, -1,
+     0,  0,  0
+     1,  2,  1
+]
