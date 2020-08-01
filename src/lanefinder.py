@@ -64,7 +64,7 @@ class LaneFinder:
         nwindows = 9
         minpix = 50
         window_height = image.shape[0] // nwindows
-        margin = 50
+        margin = 100
 
         leftx_curr = leftx_base
         rightx_curr = rightx_base
@@ -76,6 +76,9 @@ class LaneFinder:
         left_lane_idxs = []
         right_lane_idxs = []
 
+        if self.debug == True:
+            out_img = np.dstack((image, image, image))
+
         for w in range(nwindows):
             y_top = image.shape[0] - (w * window_height)
             y_bottom = image.shape[0] - ((w + 1) * window_height)
@@ -85,6 +88,12 @@ class LaneFinder:
 
             rightx_min = rightx_curr - margin
             rightx_max = rightx_curr + margin
+
+            if self.debug == True:
+                cv2.rectangle(out_img, (leftx_min, y_top),
+                              (leftx_max, y_bottom), (0, 255, 0), 4)
+                cv2.rectangle(out_img, (rightx_min, y_top),
+                              (rightx_max, y_bottom), (0, 255, 0), 4)
 
             left_idxs = ((nonzeroy >= y_bottom) &
                          (nonzeroy < y_top) &
@@ -121,6 +130,11 @@ class LaneFinder:
 
         rightx = nonzerox[right_lane_idxs]
         righty = nonzeroy[right_lane_idxs]
+
+        if self.debug == True:
+            out_img[lefty, leftx] = [255, 0, 0]
+            out_img[righty, rightx] = [0, 0, 255]
+            cv2.imshow("Sliding Windows", out_img)
 
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)

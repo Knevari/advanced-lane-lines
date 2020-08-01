@@ -20,7 +20,7 @@ def main():
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
 
-    out = cv2.VideoWriter("output/" + filename + ".mp4", fourcc,
+    out = cv2.VideoWriter("videos_output/" + filename + ".mp4", fourcc,
                           fps, (frame_width, frame_height), True)
 
     pipe = Pipeline(height=frame_height)
@@ -30,6 +30,7 @@ def main():
 
         if ret == True:
             output = pipe(frame)
+            out.write(output)
             cv2.imshow("Output", output)
         else:
             cap.release()
